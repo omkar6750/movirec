@@ -1,14 +1,18 @@
-import { Card, CardContent, CardFooter } from "./ui/card";
-import { Button } from "./ui/button";
-import { Heart, Eye, Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Heart, Plus, Check, Star } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "../../context/AuthContext";
 
 interface Movie {
 	imdbId: string;
 	title: string;
 	rating: number;
 	year?: number;
-	genre?: string[];
+	genres?: string[];
+	poster?: string;
 }
 
 interface MovieCardProps {
@@ -16,148 +20,179 @@ interface MovieCardProps {
 }
 
 export default function MovieCard({ movie }: MovieCardProps) {
-	const [isFavorite, setIsFavorite] = useState(false);
-	const [isWatched, setIsWatched] = useState(false);
-	const [isInWatchlist, setIsInWatchlist] = useState(false);
+	const { user, refetchUser } = useAuth();
 
-	const posterSrc = `${import.meta.env.VITE_SERVER_URL}/api/poster/${
-		movie.imdbId
-	}`;
+	// Local state for immediate UI feedback (Optimistic UI)
+	const [isFav, setIsFav] = useState(false);
+	const [inWatchlist, setInWatchlist] = useState(false);
+	const [isHovered, setIsHovered] = useState(false);
 
-	const handleFavorite = (e: React.MouseEvent) => {
+	useEffect(() => {
+		if (user) {
+			setIsFav(user.favourites.includes(movie.imdbId));
+			setInWatchlist(user.watchlist.includes(movie.imdbId));
+		}
+	}, [user, movie.imdbId]);
+
+	const handleToggle = async (
+		e: React.MouseEvent,
+		type: "favourites" | "watchlist"
+	) => {
 		e.preventDefault();
-		setIsFavorite(!isFavorite);
+		e.stopPropagation();
+
+		if (!user) {
+			// Optional: Add toast here "Please login"
+			alert("Please login to save movies!");
+			return;
+		}
+
+		const isAdding = type === "favourites" ? !isFav : !inWatchlist;
+		const method = isAdding ? "POST" : "DELETE";
+
+		if (type === "favourites") setIsFav(isAdding);
+		else setInWatchlist(isAdding);
+
+		try {
+			const serverUrl =
+				import.meta.env.VITE_SERVER_URL || "http://localhost:4000";
+
+			await fetch(`${serverUrl}/api/user/${type}/${movie.imdbId}`, {
+				method,
+				credentials: "include",
+			});
+
+			await refetchUser();
+		} catch (error) {
+			// Revert on error
+			if (type === "favourites") setIsFav(!isAdding);
+			else setInWatchlist(!isAdding);
+			console.error("Failed to update", error);
+		}
 	};
 
-	const handleWatched = (e: React.MouseEvent) => {
-		e.preventDefault();
-		setIsWatched(!isWatched);
-	};
-
-	const handleWatchlist = (e: React.MouseEvent) => {
-		e.preventDefault();
-		setIsInWatchlist(!isInWatchlist);
-	};
+	const posterSrc =
+		movie.poster ||
+		`${import.meta.env.VITE_SERVER_URL}/api/poster/${movie.imdbId}`;
 
 	return (
-		<Card className="group relative overflow-hidden hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50">
-			{/* Poster Image */}
-			<div className="relative aspect-[2/3] overflow-hidden bg-muted">
-				<img
-					src={posterSrc}
-					alt={movie.title}
-					className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-				/>
+		<Card
+			className="group relative overflow-hidden border-0 bg-card shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl rounded-xl"
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+		>
+			{/* Make the whole card clickable to go to details (Optional) */}
+			<Link to={`/movie/${movie.imdbId}`} className="block h-full">
+				{/* Image Container */}
+				<div className="relative aspect-[2/3] overflow-hidden bg-muted">
+					<img
+						src={posterSrc}
+						alt={movie.title}
+						loading="lazy"
+						className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+						onError={(e) => {
+							(e.target as HTMLImageElement).src =
+								"/placeholder-movie.png";
+						}}
+					/>
 
-				{/* Overlay on Hover */}
-				<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+					{/* Gradient Overlay */}
+					<div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-				{/* Action Buttons - Show on Hover */}
-				<div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-					<Button
-						size="icon"
-						variant="secondary"
-						className={`rounded-full ${
-							isFavorite
-								? "bg-red-500 hover:bg-red-600 text-white"
-								: "bg-white/90 hover:bg-white"
-						}`}
-						onClick={handleFavorite}
-					>
-						<Heart
-							className={`h-4 w-4 ${
-								isFavorite ? "fill-current" : ""
-							}`}
-						/>
-					</Button>
-					<Button
-						size="icon"
-						variant="secondary"
-						className={`rounded-full ${
-							isWatched
-								? "bg-green-500 hover:bg-green-600 text-white"
-								: "bg-white/90 hover:bg-white"
-						}`}
-						onClick={handleWatched}
-					>
-						<Eye
-							className={`h-4 w-4 ${
-								isWatched ? "fill-current" : ""
-							}`}
-						/>
-					</Button>
-					<Button
-						size="icon"
-						variant="secondary"
-						className={`rounded-full ${
-							isInWatchlist
-								? "bg-blue-500 hover:bg-blue-600 text-white"
-								: "bg-white/90 hover:bg-white"
-						}`}
-						onClick={handleWatchlist}
-					>
-						<Plus
-							className={`h-4 w-4 ${
-								isInWatchlist ? "rotate-45" : ""
-							} transition-transform`}
-						/>
-					</Button>
-				</div>
+					{/* action buttons */}
+					<div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 transition-all duration-300 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0">
+						{/* FAVOURITE BUTTON */}
+						<Button
+							variant="secondary"
+							size="icon"
+							className={cn(
+								"h-12 w-12 rounded-full shadow-lg transition-all duration-300 border-2",
+								isFav
+									? "bg-red-600 border-red-600 text-white hover:bg-red-700 hover:border-red-700 hover:scale-110"
+									: "bg-white/90 border-transparent text-gray-700 hover:bg-white hover:scale-110"
+							)}
+							onClick={(e) => handleToggle(e, "favourites")}
+							title={
+								isFav
+									? "Remove from Favourites"
+									: "Add to Favourites"
+							}
+						>
+							<Heart
+								className={cn(
+									"h-6 w-6 transition-all",
+									isFav && "fill-current scale-110"
+								)}
+							/>
+						</Button>
 
-				{/* Rating Badge */}
-				<div className="absolute top-2 right-2 bg-black/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1">
-					<span className="text-yellow-400 text-sm">⭐</span>
-					<span className="text-white text-sm">
-						{movie.rating?.toFixed(1) || "N/A"}
-					</span>
-				</div>
-
-				{/* Status Indicators */}
-				<div className="absolute top-2 left-2 flex gap-1">
-					{isFavorite && (
-						<div className="bg-red-500 rounded-full p-1">
-							<Heart className="h-3 w-3 text-white fill-current" />
-						</div>
-					)}
-					{isWatched && (
-						<div className="bg-green-500 rounded-full p-1">
-							<Eye className="h-3 w-3 text-white fill-current" />
-						</div>
-					)}
-					{isInWatchlist && (
-						<div className="bg-blue-500 rounded-full p-1">
-							<Plus className="h-3 w-3 text-white" />
-						</div>
-					)}
-				</div>
-			</div>
-
-			{/* Movie Info */}
-			<CardContent className="p-4">
-				<h3 className="truncate" title={movie.title}>
-					{movie.title}
-				</h3>
-				{movie.year && (
-					<p className="text-sm text-muted-foreground">
-						{movie.year}
-					</p>
-				)}
-			</CardContent>
-
-			<CardFooter className="p-4 pt-0">
-				{movie.genre && movie.genre.length > 0 && (
-					<div className="flex gap-1 flex-wrap">
-						{movie.genre.slice(0, 2).map((g, i) => (
-							<span
-								key={i}
-								className="text-xs bg-muted px-2 py-1 rounded"
-							>
-								{g}
-							</span>
-						))}
+						{/* WATCHLIST BUTTON */}
+						<Button
+							variant="secondary"
+							size="icon"
+							className={cn(
+								"h-12 w-12 rounded-full shadow-lg transition-all duration-300 border-2",
+								inWatchlist
+									? "bg-blue-600 border-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 hover:scale-110"
+									: "bg-white/90 border-transparent text-gray-700 hover:bg-white hover:scale-110"
+							)}
+							onClick={(e) => handleToggle(e, "watchlist")}
+							title={
+								inWatchlist
+									? "Remove from Watchlist"
+									: "Add to Watchlist"
+							}
+						>
+							{inWatchlist ? (
+								<Check className="h-6 w-6 stroke-[3px]" />
+							) : (
+								<Plus className="h-6 w-6" />
+							)}
+						</Button>
 					</div>
-				)}
-			</CardFooter>
+
+					{/* Rating Badge (Always Visible) */}
+					<div className="absolute top-2 right-2 flex items-center gap-1 rounded-md bg-black/60 px-2 py-1 backdrop-blur-md">
+						<Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+						<span className="text-xs font-bold text-white">
+							{movie.rating ? movie.rating.toFixed(1) : "N/A"}
+						</span>
+					</div>
+
+					{/* Mini Status Indicators */}
+					<div
+						className={cn(
+							"absolute top-2 left-2 flex gap-1 transition-opacity duration-300",
+							isHovered ? "opacity-0" : "opacity-100"
+						)}
+					>
+						{isFav && (
+							<div className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+						)}
+						{inWatchlist && (
+							<div className="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+						)}
+					</div>
+				</div>
+
+				{/* Content Footer */}
+				<div className="p-3">
+					<h3
+						className="line-clamp-1 text-sm font-bold leading-tight tracking-tight text-foreground"
+						title={movie.title}
+					>
+						{movie.title}
+					</h3>
+					<div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
+						<span>{movie.year || "Unknown"}</span>
+						{movie.genres && (
+							<span className="line-clamp-1 max-w-[50%] text-right opacity-80">
+								{movie.genres[0]}
+							</span>
+						)}
+					</div>
+				</div>
+			</Link>
 		</Card>
 	);
 }

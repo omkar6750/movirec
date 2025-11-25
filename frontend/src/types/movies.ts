@@ -18,7 +18,7 @@ export interface RecommendationResponse {
 	}>;
 }
 
-export interface Movie {
+export type Movie {
 	movieId: number;
 	title: string;
 	year: number | null; // Updated to allow null

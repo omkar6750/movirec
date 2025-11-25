@@ -1,68 +1,60 @@
-import express, { Router } from "express";
+dotenv.config();
+import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import mongoose from "mongoose";
+import passport from "passport";
+
+import "../config/passport.js";
+
+// Import Routes
+import authRoutes from "./routes/authRoutes.js";
 import moviesRoute from "./routes/movies.js";
 import posterRoute from "./routes/poster.js";
 import recommendRoute from "./routes/recommend.js";
 import searchRoute from "./routes/search.js";
-import fs from "fs";
+import userRoutes from "./routes/userRoutes.js";
+import genreRoutes from "./routes/genres.js";
 
-
-dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// Middleware
 app.use(express.json());
-const router = Router()
+app.use(cookieParser());
+app.use(cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true
+}));
 
+// Database
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('MongoDB Connected'))
+    .catch(err => console.log(err));
 
-// genre route
-const genreSet = new Set();
-const allMovies = JSON.parse(fs.readFileSync("./data/moviesFull.json", "utf-8"));
-allMovies.forEach(movie => {
-    if (movie.genres && Array.isArray(movie.genres)) {
-        movie.genres.forEach(g => genreSet.add(g));
-    }
-});
+// Initialize Passport
+app.use(passport.initialize());
 
-const allGenres = Array.from(genreSet).sort();
+// Base Route
 app.get("/", (req, res) => {
     res.json({ message: "Backend is running" });
 });
 
-app.use("/api/genres", router.get("/", (req, res) => {
-    let { page = 1, limit = 20 } = req.query;
-
-    page = parseInt(page);
-    limit = parseInt(limit);
-
-    if (isNaN(page) || page < 1) page = 1;
-    if (isNaN(limit) || limit < 1) limit = 20;
-
-    const start = (page - 1) * limit;
-    const end = start + limit;
-
-    const results = allGenres.slice(start, end);
-
-    res.json({
-        page,
-        limit,
-        totalGenres: allGenres.length,
-        totalPages: Math.ceil(allGenres.length / limit),
-        results
-    });
-})
-)
 
 
+// Auth Routes 
+app.use("/", authRoutes);
+
+// User Routes (Favourites/Watchlist)
+app.use("/api/user", userRoutes);
+
+// Feature Routes
 app.use("/api/movies", moviesRoute);
-
 app.use("/api/poster", posterRoute);
-
-app.use("/api/recommendations", recommendRoute)
-
+app.use("/api/recommendations", recommendRoute);
 app.use("/api/search", searchRoute);
-
+app.use("/api/genres", genreRoutes);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

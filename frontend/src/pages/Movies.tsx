@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/pagination";
 
 function getPaginationRange(current: number, total: number) {
-	const delta = 1; // show current ±1 pages
+	const delta = 1;
 	const range: (number | "...")[] = [];
 	const left = Math.max(2, current - delta);
 	const right = Math.min(total - 1, current + delta);
