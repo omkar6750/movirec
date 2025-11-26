@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Heart, Plus, Check, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "../../context/AuthContext";
+import { toast } from "sonner";
 
-// MoviesCard.tsx (top portion)
 interface Movie {
 	imdbId: string;
 	title: string;
@@ -18,10 +18,8 @@ interface Movie {
 
 interface MovieCardProps {
 	movie: Movie;
-	// controlled active card id from MoviesGrid
 	activeCard: string | null;
 	setActiveCard: (id: string | null) => void;
-	// optional: what to do when user wants to open details
 	onNavigate?: () => void;
 }
 
@@ -79,7 +77,7 @@ MovieCardProps) {
 
 		if (!user) {
 			// Optional: Add toast here "Please login"
-			alert("Please login to save movies!");
+			toast.error("Please log in to manage your lists.");
 			return;
 		}
 
@@ -139,8 +137,8 @@ MovieCardProps) {
 					<div
 						className={`absolute inset-0 flex items-center justify-center gap-3 transition-all duration-300 ${
 							showActions
-								? "opacity-100 translate-y-0"
-								: "opacity-0 translate-y-4"
+								? "opacity-100 translate-y-0 pointer-events-auto"
+								: "opacity-0 translate-y-4 pointer-events-none"
 						}`}
 					>
 						{/* FAVOURITE BUTTON */}
