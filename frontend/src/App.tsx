@@ -11,6 +11,7 @@ import { AuthProvider } from "../context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import Favourites from "./pages/Favourites";
 import Watchlist from "./pages/Watchlist";
+import CookieBanner from "./components/cookieBanner";
 
 function App() {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -23,6 +24,7 @@ function App() {
 		<>
 			<AuthProvider>
 				<Router>
+					<CookieBanner />
 					<Navbar onSearch={handleSearch} />
 					<Routes>
 						<Route path="/" element={<Home />} />
