@@ -47,7 +47,11 @@ router.get('/api/me', async (req, res) => {
 
 // 4. Logout
 router.post('/api/logout', (req, res) => {
-        res.clearCookie('token');
+        res.clearCookie('token', {
+                httpOnly: true,
+                sameSite: 'none',
+                secure: true
+        })
         res.json({ message: 'Logged out' });
 });
 
