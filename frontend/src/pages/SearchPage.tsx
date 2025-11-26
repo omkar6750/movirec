@@ -153,7 +153,7 @@ export function SearchPage({ searchQuery }: SearchPageProps) {
 			)}
 
 			{/* Error State */}
-			{/* {error && (
+			{/* {error && (=
 				<Alert variant="destructive" className="mb-8">
 					<AlertDescription>{error}</AlertDescription>
 				</Alert>

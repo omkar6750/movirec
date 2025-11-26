@@ -42,7 +42,7 @@ router.get("/", (req, res) => {
                 page,
                 limit,
                 totalMovies: results.length,
-                totalPages: Math.ceil(searc.length / limit),
+                totalPages: Math.ceil(searchResults.length / limit),
                 query: normalizedQuery,
                 results: results
         });
