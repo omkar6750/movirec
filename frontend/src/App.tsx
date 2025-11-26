@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Movies from "./pages/Movies";
 import MovieRecommendationForm from "./pages/Recommendation";
+import RecommendedMovies from "./pages/RecommendedMovies"; // Imported new page
 import { Toaster } from "./components/ui/sonner";
 import { Navbar } from "./components/Navbar";
 import { SearchPage } from "./pages/SearchPage";
@@ -29,10 +30,17 @@ function App() {
 					<Routes>
 						<Route path="/" element={<Home />} />
 						<Route path="/movies" element={<Movies />} />
+
 						<Route
 							path="/recommended"
 							element={<MovieRecommendationForm />}
 						/>
+
+						<Route
+							path="/recommended/movies"
+							element={<RecommendedMovies />}
+						/>
+
 						<Route
 							path="/search"
 							element={<SearchPage searchQuery={searchQuery} />}

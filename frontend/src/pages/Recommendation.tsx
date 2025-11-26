@@ -2,19 +2,10 @@
 
 import * as React from "react";
 import { z } from "zod";
-import {
-	X,
-	Film,
-	Loader2,
-	Plus,
-	CircleCheck,
-	Info,
-	AlertTriangle,
-	AlertOctagon,
-} from "lucide-react";
-import { toast, Toaster as Sonner } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { Film, Loader2, Plus, X } from "lucide-react";
+import { toast } from "sonner";
 
-// shadcn/ui components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,34 +26,6 @@ import {
 	CardFooter,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-
-type ToasterProps = React.ComponentProps<typeof Sonner>;
-
-const Toaster = ({ ...props }: ToasterProps) => {
-	return (
-		<Sonner
-			className="toaster group"
-			toastOptions={{
-				classNames: {
-					toast: "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
-					description: "group-[.toast]:text-muted-foreground",
-					actionButton:
-						"group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
-					cancelButton:
-						"group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
-				},
-			}}
-			icons={{
-				success: <CircleCheck className="h-4 w-4 text-green-500" />,
-				info: <Info className="h-4 w-4 text-blue-500" />,
-				warning: <AlertTriangle className="h-4 w-4 text-amber-500" />,
-				error: <AlertOctagon className="h-4 w-4 text-red-500" />,
-				loading: <Loader2 className="h-4 w-4 animate-spin" />,
-			}}
-			{...props}
-		/>
-	);
-};
 
 // --- ENUMS ---
 enum Mood {
@@ -118,13 +81,12 @@ const movieFormSchema = z.object({
 
 type MovieFormValues = z.infer<typeof movieFormSchema>;
 
-// --- CONSTANTS ---
 const DECADES = Array.from({ length: 11 }, (_, i) => 1920 + i * 10).reverse();
 
 export default function MovieRecommendationForm() {
+	const navigate = useNavigate();
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-	// State for form fields
 	const [formData, setFormData] = React.useState<Partial<MovieFormValues>>({
 		vibe: "",
 		genres: [],
@@ -133,14 +95,10 @@ export default function MovieRecommendationForm() {
 		mood: undefined,
 	});
 
-	// State for validation errors
 	const [errors, setErrors] = React.useState<Record<string, string>>({});
-
-	// --- HANDLERS ---
 
 	const handleVibeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		setFormData((prev) => ({ ...prev, vibe: e.target.value }));
-		// Clear error on change
 		if (errors.vibe) setErrors((prev) => ({ ...prev, vibe: "" }));
 	};
 
@@ -174,19 +132,15 @@ export default function MovieRecommendationForm() {
 		setFormData((prev) => ({ ...prev, minRating: parseFloat(value) }));
 	};
 
-	// --- SUBMIT ---
-
 	async function onSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		setIsSubmitting(true);
 		setErrors({});
 
-		// Validate using Zod
 		const result = movieFormSchema.safeParse(formData);
 
 		if (!result.success) {
 			const formattedErrors: Record<string, string> = {};
-			// Use .issues instead of .errors to satisfy ZodError type definition
 			result.error.issues.forEach((err) => {
 				if (err.path[0]) {
 					formattedErrors[err.path[0] as string] = err.message;
@@ -199,24 +153,43 @@ export default function MovieRecommendationForm() {
 		}
 
 		const validData = result.data;
-		console.log("Submitting Payload:", validData);
 
 		try {
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1500));
+			const payload = {
+				mood: validData.mood,
+				genres: validData.genres,
+				decade:
+					validData.decade === "all" ? undefined : validData.decade,
+				minRating: validData.minRating,
+				vibe: validData.vibe,
+				limit: 10,
+			};
 
-			const count = Math.floor(Math.random() * 10) + 1;
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
 
-			toast.success("Recommendations Ready!", {
-				description: `Found ${count} movies matching your criteria. Check your dashboard.`,
-				duration: 5000,
+			const response = await fetch(`${serverUrl}/api/recommendations`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(payload),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to fetch recommendations");
+			}
+
+			const movies = await response.json();
+
+			navigate("/recommended/movies", {
+				state: {
+					results: movies,
+					vibe: validData.vibe,
+				},
 			});
 		} catch (error) {
-			console.error("Submission Error:", error);
-			toast.error("Submission Failed", {
-				description:
-					"Something went wrong fetching recommendations. Please try again.",
-			});
+			console.error(error);
+			toast.error("Could not fetch recommendations. Please try again.");
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -224,8 +197,6 @@ export default function MovieRecommendationForm() {
 
 	return (
 		<div className="flex justify-center p-4 pt-16 h-screen w-full relative">
-			<Toaster position="bottom-right" />
-
 			<Card className="w-full max-w-2xl border-border bg-card shadow-sm h-fit radius-lg">
 				<CardHeader className="space-y-1">
 					<div className="flex items-center gap-2">
@@ -324,8 +295,6 @@ export default function MovieRecommendationForm() {
 						{/* GENRES MULTI-SELECT */}
 						<div className="space-y-2">
 							<Label className="text-foreground">Genres</Label>
-
-							{/* Genre Selector */}
 							<Select onValueChange={handleAddGenre}>
 								<SelectTrigger className="bg-background">
 									<SelectValue placeholder="Add genres..." />
@@ -345,7 +314,6 @@ export default function MovieRecommendationForm() {
 								</SelectContent>
 							</Select>
 
-							{/* Selected Genres List */}
 							<div className="flex flex-wrap gap-2 min-h-[40px] p-3 rounded-md border border-input bg-muted/30 mt-2">
 								{(!formData.genres ||
 									formData.genres.length === 0) && (
@@ -377,11 +345,9 @@ export default function MovieRecommendationForm() {
 									</Badge>
 								))}
 							</div>
-
 							<p className="text-[0.8rem] text-muted-foreground">
 								Select up to 5 genres to refine your search.
 							</p>
-
 							{errors.genres && (
 								<p className="text-sm font-medium text-destructive">
 									{errors.genres}
