@@ -1,5 +1,6 @@
 import { Button } from "./ui/button";
 import { Play } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function Hero() {
 	return (
@@ -26,21 +27,27 @@ export function Hero() {
 						in one place. Never forget what to watch next with our
 						intuitive movie management system.
 					</p>
+
 					<div className="flex gap-4 justify-center flex-wrap">
-						<Button
-							size="lg"
-							className="bg-blue-600 hover:bg-blue-700"
-						>
-							<Play className="mr-2 h-5 w-5" />
-							Get Started
-						</Button>
-						<Button
-							size="lg"
-							variant="outline"
-							className="bg-white/10 backdrop-blur-sm text-white border-white/20 hover:bg-white/20"
-						>
-							Learn More
-						</Button>
+						<Link to="/recommended">
+							<Button
+								size="lg"
+								className="bg-blue-600 hover:bg-blue-700"
+							>
+								<Play className="mr-2 h-5 w-5" />
+								Get Started
+							</Button>
+						</Link>
+
+						<Link to="/recommended">
+							<Button
+								size="lg"
+								variant="outline"
+								className="bg-white/10 backdrop-blur-sm text-white border-white/20 hover:bg-white/20"
+							>
+								Learn More
+							</Button>
+						</Link>
 					</div>
 				</div>
 			</div>

@@ -6,8 +6,26 @@ import {
 	CardHeader,
 	CardTitle,
 } from "./ui/card";
+import { Button } from "./ui/button";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export function Features() {
+	const { user } = useAuth();
+	const navigate = useNavigate();
+
+	const handleGetStarted = () => {
+		if (user) {
+			// Already logged in → go to Movies page
+			navigate("/movies");
+		} else {
+			// Not logged in → trigger Google OAuth
+			window.location.href = `${
+				import.meta.env.VITE_SERVER_URL
+			}/auth/google`;
+		}
+	};
+
 	const features = [
 		{
 			icon: Heart,
@@ -67,15 +85,18 @@ export function Features() {
 					))}
 				</div>
 
+				{/* CTA */}
 				<div className="mt-16 text-center">
 					<p className="text-muted-foreground mb-4">
 						Ready to start organizing your movie collection?
 					</p>
-					<div className="inline-flex gap-2 items-center px-6 py-3 bg-primary/10 rounded-lg border border-primary/20">
-						<span className="text-primary">✨</span>
-						<span>Sign up today and get started for free</span>
-						<span className="text-primary">✨</span>
-					</div>
+
+					<Button
+						className="px-6 py-3 text-lg shadow-md"
+						onClick={handleGetStarted}
+					>
+						✨ Sign Up (or Login) & Get Started ✨
+					</Button>
 				</div>
 			</div>
 		</section>

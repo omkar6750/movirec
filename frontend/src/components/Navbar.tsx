@@ -36,7 +36,6 @@ export function Navbar({ onSearch }: NavbarProps) {
 	const [isVisible, setIsVisible] = useState(true);
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-	// Helper to get initials for Avatar Fallback
 	const getInitials = (name?: string) => {
 		if (!name) return "U";
 		return name
@@ -136,16 +135,6 @@ export function Navbar({ onSearch }: NavbarProps) {
 
 				{/* --- Auth Section (Right Side) --- */}
 				<div className="flex items-center gap-2">
-					{/* Mobile Search Trigger (Optional, if space is tight) */}
-					<Button
-						variant="ghost"
-						size="icon"
-						className="md:hidden"
-						onClick={() => navigate("/search")}
-					>
-						<Search className="h-5 w-5" />
-					</Button>
-
 					{user ? (
 						// LOGGED IN: Avatar Dropdown
 						<DropdownMenu>
