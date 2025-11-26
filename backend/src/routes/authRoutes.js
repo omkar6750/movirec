@@ -32,7 +32,7 @@ router.get('/auth/google/callback',
 // 3. Verify User (Frontend calls this)
 router.get('/api/me', async (req, res) => {
         const token = req.cookies.token;
-        if (!token) return res.status(401).json({ authenticated: false }).message("missing token");
+        if (!token) return res.status(401).json({ authenticated: false })
 
         try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
