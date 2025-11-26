@@ -25,12 +25,12 @@ router.get('/:imdbId', async (req, res) => {
 
                         return res.redirect(data.Poster);
                 } else {
-                        return res.redirect("http://localhost:5173/placeholder.jpg");
+                        return res.redirect(`${process.env.FRONTEND_URL}/placeholder.jpg`);
                 }
 
         } catch (error) {
                 console.error("OMDb Error:", error.message);
-                return res.redirect("http://localhost:5173/placeholder.jpg");
+                return res.redirect(`${process.env.FRONTEND_URL}/placeholder.jpg`);
         }
 });
 
