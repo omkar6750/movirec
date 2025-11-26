@@ -54,8 +54,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
 		else setInWatchlist(isAdding);
 
 		try {
-			const serverUrl =
-				import.meta.env.VITE_SERVER_URL || "http://localhost:4000";
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 			await fetch(`${serverUrl}/api/user/${type}/${movie.imdbId}`, {
 				method,

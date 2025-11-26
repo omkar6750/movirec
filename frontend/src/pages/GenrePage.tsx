@@ -64,8 +64,7 @@ export function GenrePage() {
 
 	// Config
 	const limit = 20;
-	const serverUrl =
-		import.meta.env.VITE_SERVER_URL || "http://localhost:4000";
+	const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 	// 1. Fetch All Genres on Mount
 	useEffect(() => {

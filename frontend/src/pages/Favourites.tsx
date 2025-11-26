@@ -22,8 +22,7 @@ export default function Favourites() {
 
 	const fetchFavourites = async () => {
 		try {
-			const serverUrl =
-				import.meta.env.VITE_SERVER_URL || "http://localhost:4000";
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 			// credentials: "include" is CRITICAL to send the Auth Cookie
 			const response = await fetch(`${serverUrl}/api/user/favourites`, {

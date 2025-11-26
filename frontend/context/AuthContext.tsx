@@ -32,11 +32,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	// Define the fetch logic as a reusable function
 	const refetchUser = async () => {
 		try {
-			const response = await fetch("http://localhost:4000/api/me", {
-				method: "GET",
-				credentials: "include", // CRITICAL: Sends the HttpOnly cookie
-				headers: { "Content-Type": "application/json" },
-			});
+			const response = await fetch(
+				`${import.meta.env.VITE_SERVER_URL}/api/me`,
+				{
+					method: "GET",
+					credentials: "include", // CRITICAL: Sends the HttpOnly cookie
+					headers: { "Content-Type": "application/json" },
+				}
+			);
 
 			if (!response.ok) throw new Error("Not authenticated");
 
@@ -59,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 	const logout = async () => {
 		try {
-			await fetch("http://localhost:4000/api/logout", {
+			await fetch(`${import.meta.env.VITE_SERVER_URL}/api/logout`, {
 				method: "POST",
 				credentials: "include",
 			});

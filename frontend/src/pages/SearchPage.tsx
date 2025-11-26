@@ -85,8 +85,7 @@ export function SearchPage({ searchQuery }: SearchPageProps) {
 		setError(null);
 
 		try {
-			const serverUrl =
-				import.meta.env.VITE_SERVER_URL || "http://localhost:4000";
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
 			const response = await fetch(
 				`${serverUrl}/api/search?title=${encodeURIComponent(
 					query
