@@ -18,7 +18,7 @@ export interface RecommendationResponse {
 	}>;
 }
 
-export type Movie {
+export type Movie = {
 	movieId: number;
 	title: string;
 	year: number | null; // Updated to allow null
@@ -32,7 +32,7 @@ export type Movie {
 	// Frontend specific props (added by backend engine)
 	score?: number;
 	poster?: string;
-}
+};
 
 // export interface RecommendationResponse {
 // 	data: Movie[];

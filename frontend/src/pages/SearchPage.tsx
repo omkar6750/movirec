@@ -109,13 +109,6 @@ export function SearchPage({ searchQuery }: SearchPageProps) {
 		}
 	};
 
-	const handlePageChange = (newPage: number) => {
-		if (newPage >= 1 && newPage <= totalPages) {
-			setPage(newPage);
-			window.scrollTo({ top: 0, behavior: "smooth" });
-		}
-	};
-
 	if (!searchQuery) {
 		return (
 			<div className="container mx-auto px-4 py-16">

@@ -1,14 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-	Menu,
-	Search,
-	X,
-	LogOut,
-	User as UserIcon,
-	Heart,
-	ListVideo,
-} from "lucide-react";
+import { Menu, Search, X, LogOut, Heart, ListVideo } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 // Shadcn UI Components
