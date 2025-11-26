@@ -81,7 +81,8 @@ export default function MovieCard({ movie }: MovieCardProps) {
 			onMouseLeave={() => setIsHovered(false)}
 		>
 			{/* Make the whole card clickable to go to details (Optional) */}
-			<Link to={`/movie/${movie.imdbId}`} className="block h-full">
+			{/* <Link to={`/movie/${movie.imdbId}`} className="block h-full"> */}
+			<div className="block h-full">
 				{/* Image Container */}
 				<div className="relative aspect-[2/3] overflow-hidden bg-muted">
 					<img
@@ -191,7 +192,8 @@ export default function MovieCard({ movie }: MovieCardProps) {
 						)}
 					</div>
 				</div>
-			</Link>
+			</div>
+			{/* </Link> */}
 		</Card>
 	);
 }
