@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Loader2, Heart } from "lucide-react";
-import MovieCard from "@/components/MoviesCard";
+import MoviesGrid from "@/components/MoviesGrid";
 
 interface Movie {
 	imdbId: string;
@@ -84,11 +84,13 @@ export default function Favourites() {
 
 			{/* Movies Grid */}
 			{!loading && movies.length > 0 && (
-				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-					{movies.map((movie) => (
-						<MovieCard key={movie.imdbId} movie={movie} />
-					))}
-				</div>
+				<MoviesGrid
+					movies={movies}
+					isLoading={loading}
+					// onCardClick={(movie) => navigate(`/movie/${movie.imdbId}`)}
+					// optional: override columns for small pages
+					colsClassName="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+				/>
 			)}
 		</div>
 	);

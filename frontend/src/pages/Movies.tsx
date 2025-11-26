@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import MovieCard from "../components/MoviesCard";
 
 import {
 	Pagination,
@@ -10,6 +9,7 @@ import {
 	PaginationNext,
 	PaginationEllipsis,
 } from "@/components/ui/pagination";
+import MoviesGrid from "@/components/MoviesGrid";
 
 function getPaginationRange(current: number, total: number) {
 	const delta = 1;
@@ -68,11 +68,13 @@ export default function Movies() {
 			<h1 className="text-3xl font-bold mb-6">Movies</h1>
 
 			{/* Movies Grid */}
-			<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-				{movies.map((m: any) => (
-					<MovieCard key={m.id} movie={m} />
-				))}
-			</div>
+			<MoviesGrid
+				movies={movies}
+				// isLoading={loading}
+				// onCardClick={(movie) => navigate(`/movie/${movie.imdbId}`)}
+				// optional: override columns for small pages
+				colsClassName="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+			/>
 
 			{/* Pagination */}
 			<div className="mt-10 flex justify-center">

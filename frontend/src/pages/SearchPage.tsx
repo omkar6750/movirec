@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import MovieCard from "@/components/MoviesCard";
 import {
 	Pagination,
 	PaginationContent,
@@ -10,6 +9,7 @@ import {
 	PaginationNext,
 	PaginationEllipsis,
 } from "@/components/ui/pagination";
+import MoviesGrid from "@/components/MoviesGrid";
 // import { Alert, AlertDescription } from "./ui/alert";
 
 interface SearchPageProps {
@@ -164,11 +164,12 @@ export function SearchPage({ searchQuery }: SearchPageProps) {
 			{/* Movies Grid */}
 			{!loading && movies.length > 0 && (
 				<>
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-						{movies.map((movie) => (
-							<MovieCard key={movie.imdbId} movie={movie} />
-						))}
-					</div>
+					<MoviesGrid
+						movies={movies}
+						isLoading={loading}
+						// onCardClick={(movie) => navigate(`/movie/${movie.imdbId}`)}
+						colsClassName="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+					/>
 
 					{/* Pagination */}
 					{totalPages > 1 && (

@@ -5,6 +5,7 @@ import { Heart, Plus, Check, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "../../context/AuthContext";
 
+// MoviesCard.tsx (top portion)
 interface Movie {
 	imdbId: string;
 	title: string;
@@ -12,19 +13,55 @@ interface Movie {
 	year?: number;
 	genres?: string[];
 	poster?: string;
+	[k: string]: any;
 }
 
 interface MovieCardProps {
 	movie: Movie;
+	// controlled active card id from MoviesGrid
+	activeCard: string | null;
+	setActiveCard: (id: string | null) => void;
+	// optional: what to do when user wants to open details
+	onNavigate?: () => void;
 }
 
-export default function MovieCard({ movie }: MovieCardProps) {
+export default function MovieCard({
+	movie,
+	activeCard,
+	setActiveCard,
+}: // onNavigate,
+MovieCardProps) {
 	const { user, refetchUser } = useAuth();
 
 	// Local state for immediate UI feedback (Optimistic UI)
 	const [isFav, setIsFav] = useState(false);
 	const [inWatchlist, setInWatchlist] = useState(false);
 	const [isHovered, setIsHovered] = useState(false);
+
+	const [isMobile, setIsMobile] = useState<boolean>(() =>
+		typeof window !== "undefined"
+			? window.matchMedia("(max-width: 768px)").matches
+			: false
+	);
+
+	useEffect(() => {
+		const mq = window.matchMedia("(max-width: 768px)");
+		const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+		mq.addEventListener?.("change", handler);
+		return () => mq.removeEventListener?.("change", handler);
+	}, []);
+
+	const isOpen = activeCard === movie.imdbId;
+	const showActions = isMobile ? isOpen : isHovered;
+
+	const onCardTap = (e: React.MouseEvent) => {
+		e.stopPropagation();
+
+		if (!isMobile) return;
+
+		if (isOpen) setActiveCard(null);
+		else setActiveCard(movie.imdbId);
+	};
 
 	useEffect(() => {
 		if (user) {
@@ -75,11 +112,11 @@ export default function MovieCard({ movie }: MovieCardProps) {
 
 	return (
 		<Card
-			className="group relative overflow-hidden border-0 bg-card shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl rounded-xl"
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
+			className="group relative ..."
+			onClick={onCardTap}
+			onMouseEnter={() => !isMobile && setIsHovered(true)}
+			onMouseLeave={() => !isMobile && setIsHovered(false)}
 		>
-			{/* Make the whole card clickable to go to details (Optional) */}
 			{/* <Link to={`/movie/${movie.imdbId}`} className="block h-full"> */}
 			<div className="block h-full">
 				{/* Image Container */}
@@ -99,7 +136,13 @@ export default function MovieCard({ movie }: MovieCardProps) {
 					<div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
 					{/* action buttons */}
-					<div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 transition-all duration-300 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0">
+					<div
+						className={`absolute inset-0 flex items-center justify-center gap-3 transition-all duration-300 ${
+							showActions
+								? "opacity-100 translate-y-0"
+								: "opacity-0 translate-y-4"
+						}`}
+					>
 						{/* FAVOURITE BUTTON */}
 						<Button
 							variant="secondary"
