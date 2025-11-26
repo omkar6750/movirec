@@ -11,7 +11,7 @@ import { AuthProvider } from "../context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import Favourites from "./pages/Favourites";
 import Watchlist from "./pages/Watchlist";
-import CookieBanner from "./components/cookieBanner";
+import CookieBanner from "./components/CookieBanner";
 
 function App() {
 	const [searchQuery, setSearchQuery] = useState("");
